@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Голланда на определение профессиональной направленности</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box;}
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        .instruction {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        .question-pair {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        .question-pair:hover {
+            background-color: #f0f0f0;
+        }
+        .profession {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            flex: 1;
+            padding: 10px;
+            transition: all 0.3s;
+        }
+        .profession:hover {
+            background-color: #e8e8e8;
+            border-radius: 5px;
+        }
+        .profession input[type="radio"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .profession label {
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .code {
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-left: 5px;
+        }
+        .separator {
+            margin: 0 20px;
+            color: #bdc3c7;
+        }
+        button {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 40px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:disabled {
+            background-color: #b2cbe4;
+            cursor: not-allowed;
+        }
+        button:hover:enabled {
+            background-color: #2980b9;
+        }
+        #results {
+            display: none;
+            margin-top: 40px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+        .result-note {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            font-weight: 600;
+        }
+        .type-descriptions {
+            margin-top: 40px;
+        }
+        .type-descriptions h2 {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+        .type-block {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .type-block h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+        .type-block p {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #555;
+        }
+        .name-block {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .name-block label {
+            font-size: 15px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        .name-block input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            width: 200px;
+        }
+        #downloadPdfBtn {
+            display: none;
+            margin-top: 20px;
+            background-color: #27ae60;
+        }
+        #downloadPdfBtn:hover {
+            background-color: #219150;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <h1>Тест Дж. Голланда на определение профессиональной направленности личности</h1>
+        <div class="instruction">
+            <strong>Инструкция:</strong> Предположим, что после соответствующего обучения Вы сможете выполнять любую работу. Вам предлагается 42 пары профессий. Из каждой пары профессий нужно выбрать одну профессию, которая Вам больше подходит, больше нравится (исходя из ваших способностей и возможностей). Рядом с названиями профессий стоят коды. В бланке ответов напротив кодов выбранных профессий ставьте знак «+». Затем подсчитайте количество знаков «+» в каждой строке бланка ответов.
+        </div>
+        <form id="testForm" autocomplete="off">
+            <!-- Имя и фамилия -->
+            <div class="name-block">
+                <label for="userName">Имя:</label>
+                <input type="text" id="userName" name="userName" required>
+                <label for="userSurname">Фамилия:</label>
+                <input type="text" id="userSurname" name="userSurname" required>
+            </div>
+            <!-- ВОПРОСЫ (42 пары) -->
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q1" value="1" id="q1_1">
+                    <label for="q1_1">Инженер <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q1" value="2" id="q1_2">
+                    <label for="q1_2">Социолог <span class="code">(2)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q2" value="1" id="q2_1">
+                    <label for="q2_1">Кондитер <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q2" value="3" id="q2_2">
+                    <label for="q2_2">Священнослужитель <span class="code">(3)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q3" value="1" id="q3_1">
+                    <label for="q3_1">Повар <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q3" value="4" id="q3_2">
+                    <label for="q3_2">Статистик <span class="code">(4)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q4" value="1" id="q4_1">
+                    <label for="q4_1">Фотограф <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q4" value="5" id="q4_2">
+                    <label for="q4_2">Администратор торгового зала <span class="code">(5)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q5" value="1" id="q5_1">
+                    <label for="q5_1">Механик <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q5" value="6" id="q5_2">
+                    <label for="q5_2">Дизайнер <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q6" value="2" id="q6_1">
+                    <label for="q6_1">Философ <span class="code">(2)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q6" value="3" id="q6_2">
+                    <label for="q6_2">Врач <span class="code">(3)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q7" value="2" id="q7_1">
+                    <label for="q7_1">Эколог <span class="code">(2)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q7" value="4" id="q7_2">
+                    <label for="q7_2">Бухгалтер <span class="code">(4)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q8" value="2" id="q8_1">
+                    <label for="q8_1">Программист <span class="code">(2)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q8" value="5" id="q8_2">
+                    <label for="q8_2">Адвокат <span class="code">(5)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q9" value="2" id="q9_1">
+                    <label for="q9_1">Кинолог <span class="code">(2)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q9" value="6" id="q9_2">
+                    <label for="q9_2">Переводчик художественной литературы <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q10" value="3" id="q10_1">
+                    <label for="q10_1">Страховой агент <span class="code">(3)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q10" value="4" id="q10_2">
+                    <label for="q10_2">Архивист <span class="code">(4)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q11" value="3" id="q11_1">
+                    <label for="q11_1">Тренер <span class="code">(3)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q11" value="5" id="q11_2">
+                    <label for="q11_2">Телеоператор <span class="code">(5)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q12" value="3" id="q12_1">
+                    <label for="q12_1">Следователь <span class="code">(3)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q12" value="6" id="q12_2">
+                    <label for="q12_2">Искусствовед <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q13" value="4" id="q13_1">
+                    <label for="q13_1">Нотариус <span class="code">(4)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q13" value="5" id="q13_2">
+                    <label for="q13_2">Брокер <span class="code">(5)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q14" value="4" id="q14_1">
+                    <label for="q14_1">Оператор ЭВМ <span class="code">(4)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q14" value="6" id="q14_2">
+                    <label for="q14_2">Манекенщица <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q15" value="5" id="q15_1">
+                    <label for="q15_1">Фотокорреспондент <span class="code">(5)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q15" value="6" id="q15_2">
+                    <label for="q15_2">Реставратор <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q16" value="1" id="q16_1">
+                    <label for="q16_1">Озеленитель <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q16" value="2" id="q16_2">
+                    <label for="q16_2">Биолог-исследователь <span class="code">(2)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q17" value="1" id="q17_1">
+                    <label for="q17_1">Водитель автотранспорта <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q17" value="3" id="q17_2">
+                    <label for="q17_2">Бортпроводник <span class="code">(3)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q18" value="1" id="q18_1">
+                    <label for="q18_1">Метролог <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q18" value="4" id="q18_2">
+                    <label for="q18_2">Картограф <span class="code">(4)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q19" value="1" id="q19_1">
+                    <label for="q19_1">Радиомонтажник <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q19" value="6" id="q19_2">
+                    <label for="q19_2">Художник росписи по дереву <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q20" value="2" id="q20_1">
+                    <label for="q20_1">Геолог <span class="code">(2)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q20" value="3" id="q20_2">
+                    <label for="q20_2">Гид-переводчик <span class="code">(3)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q21" value="5" id="q21_1">
+                    <label for="q21_1">Журналист <span class="code">(5)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q21" value="6" id="q21_2">
+                    <label for="q21_2">Режиссер <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q22" value="2" id="q22_1">
+                    <label for="q22_1">Библиограф <span class="code">(2)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q22" value="4" id="q22_2">
+                    <label for="q22_2">Аудитор <span class="code">(4)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q23" value="2" id="q23_1">
+                    <label for="q23_1">Фармацевт <span class="code">(2)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q23" value="3" id="q23_2">
+                    <label for="q23_2">Юрисконсульт <span class="code">(3)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q24" value="2" id="q24_1">
+                    <label for="q24_1">Генетик <span class="code">(2)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q24" value="6" id="q24_2">
+                    <label for="q24_2">Архитектор <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q25" value="3" id="q25_1">
+                    <label for="q25_1">Продавец <span class="code">(3)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q25" value="4" id="q25_2">
+                    <label for="q25_2">Оператор почтовой связи <span class="code">(4)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q26" value="3" id="q26_1">
+                    <label for="q26_1">Социальный работник <span class="code">(3)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q26" value="5" id="q26_2">
+                    <label for="q26_2">Предприниматель <span class="code">(5)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q27" value="3" id="q27_1">
+                    <label for="q27_1">Преподаватель ВУЗа <span class="code">(3)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q27" value="6" id="q27_2">
+                    <label for="q27_2">Музыкант-исполнитель <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q28" value="4" id="q28_1">
+                    <label for="q28_1">Экономист <span class="code">(4)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q28" value="5" id="q28_2">
+                    <label for="q28_2">Менеджер <span class="code">(5)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q29" value="4" id="q29_1">
+                    <label for="q29_1">Корректор <span class="code">(4)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q29" value="6" id="q29_2">
+                    <label for="q29_2">Дирижер <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q30" value="5" id="q30_1">
+                    <label for="q30_1">Инспектор таможни <span class="code">(5)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q30" value="6" id="q30_2">
+                    <label for="q30_2">Художник-модельер <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q31" value="1" id="q31_1">
+                    <label for="q31_1">Телефонист <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q31" value="2" id="q31_2">
+                    <label for="q31_2">Орнитолог <span class="code">(2)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q32" value="1" id="q32_1">
+                    <label for="q32_1">Агроном <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q32" value="4" id="q32_2">
+                    <label for="q32_2">Топограф <span class="code">(4)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q33" value="1" id="q33_1">
+                    <label for="q33_1">Лесник <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q33" value="5" id="q33_2">
+                    <label for="q33_2">Директор <span class="code">(5)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q34" value="1" id="q34_1">
+                    <label for="q34_1">Мастер по ремонту и пошиву одежды <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q34" value="6" id="q34_2">
+                    <label for="q34_2">Хореограф <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q35" value="2" id="q35_1">
+                    <label for="q35_1">Историк <span class="code">(2)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q35" value="4" id="q35_2">
+                    <label for="q35_2">Инспектор ГАИ <span class="code">(4)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q36" value="2" id="q36_1">
+                    <label for="q36_1">Антрополог <span class="code">(2)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q36" value="3" id="q36_2">
+                    <label for="q36_2">Экскурсовод <span class="code">(3)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q37" value="2" id="q37_1">
+                    <label for="q37_1">Вирусолог <span class="code">(2)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q37" value="6" id="q37_2">
+                    <label for="q37_2">Актер <span class="code">(6)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q38" value="3" id="q38_1">
+                    <label for="q38_1">Официант <span class="code">(3)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q38" value="5" id="q38_2">
+                    <label for="q38_2">Товаровед <span class="code">(5)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q39" value="4" id="q39_1">
+                    <label for="q39_1">Главный бухгалтер <span class="code">(4)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q39" value="5" id="q39_2">
+                    <label for="q39_2">Инспектор уголовного розыска <span class="code">(5)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q40" value="6" id="q40_1">
+                    <label for="q40_1">Парикмахер-модельер <span class="code">(6)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q40" value="3" id="q40_2">
+                    <label for="q40_2">Психолог <span class="code">(3)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q41" value="1" id="q41_1">
+                    <label for="q41_1">Пчеловод <span class="code">(1)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q41" value="5" id="q41_2">
+                    <label for="q41_2">Коммерсант <span class="code">(5)</span></label>
+                </div>
+            </div>
+            <div class="question-pair">
+                <div class="profession">
+                    <input type="radio" name="q42" value="3" id="q42_1">
+                    <label for="q42_1">Судья <span class="code">(3)</span></label>
+                </div>
+                <span class="separator">—</span>
+                <div class="profession">
+                    <input type="radio" name="q42" value="4" id="q42_2">
+                    <label for="q42_2">Стенографист <span class="code">(4)</span></label>
+                </div>
+            </div>
+            <!-- Кнопка -->
+            <button type="button" id="showResultsBtn" disabled>Показать результаты</button>
+        </form>
+        <div id="results">
+            <h2>Бланк ответов</h2>
+            <div style="font-size:16px; margin-bottom: 10px;">
+                <span id="userFullName"></span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Код профессии</th>
+                        <th>Выбор (фиксировать +)</th>
+                        <th>Сумма плюсов</th>
+                        <th>Профессиональные типы личности</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td id="choices1"></td>
+                        <td id="sum1">0</td>
+                        <td>Реалистичный тип (Р)</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td id="choices2"></td>
+                        <td id="sum2">0</td>
+                        <td>Интеллектуальный тип (И)</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td id="choices3"></td>
+                        <td id="sum3">0</td>
+                        <td>Социальный тип (С)</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td id="choices4"></td>
+                        <td id="sum4">0</td>
+                        <td>Конвенциональный тип (К)</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td id="choices5"></td>
+                        <td id="sum5">0</td>
+                        <td>Предприимчивый тип (П)</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td id="choices6"></td>
+                        <td id="sum6">0</td>
+                        <td>Артистичный тип (А)</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="result-note">
+                <strong>Интерес представляют коды профессий, набравшие наибольшее количество плюсов. Предпочтительный «профессиональный тип» личности является совокупностью двух-трех типов, набравших наибольшее количество плюсов.</strong>
+            </div>
+        </div>
+        <button id="downloadPdfBtn" type="button">Скачать PDF</button>
+        <!-- Блок с типами личности, скрыт до показа результатов -->
+        <div class="type-descriptions" id="typeDescriptions" style="display:none;">
+            <h2>Профессиональные типы личности</h2>
+            <div class="type-block">
+                <h3>Реалистичный тип (Р)</h3>
+                <p>Реалистичному типу личности свойственна эмоциональная стабильность, ориентация на настоящее. Представители данного типа занимаются конкретными объектами и их практическим использованием: вещами, инструментами, машинами. Отдают предпочтение занятиям, требующим моторных навыков, ловкости, конкретности. Профессии – механик, электрик, инженер, моряк, токарь, станочник, шофер и т. п.</p>
+            </div>
+            <div class="type-block">
+                <h3>Интеллектуальный тип (И)</h3>
+                <p>Интеллектуальный тип ориентирован на умственный труд. Он аналитичен, рационален, независим, оригинален. Преобладают теоретические и в некоторой степени эстетические ценности. Размышления о проблеме он предпочитает занятиям по реализации связанных с ней решений. Ему нравится решать задачи, требующие абстрактного мышления. Профессии выбирает в первую очередь научные – математик, физик, астроном и т. д.</p>
+            </div>
+            <div class="type-block">
+                <h3>Социальный тип (С)</h3>
+                <p>Социальный тип ставит перед собой такие цели и задачи, которые позволяют им установить тесный контакт с окружающей социальной средой. Обладает социальными умениями и нуждается в социальных контактах. Стремятся поучать, воспитывать, гуманны, способны приспособиться практически к любым условиям, стараются держаться в стороне от интеллектуальных проблем. Они активны и решают проблемы, опираясь главным образом на эмоции, чувства и умение общаться. Профессии – врач, учитель, психолог, социальный работник и т. п.</p>
+            </div>
+            <div class="type-block">
+                <h3>Конвенциональный тип (К)</h3>
+                <p>Конвенциональный тип отдает предпочтение четко структурированной деятельности. Из окружающей его среды он выбирает цели, задачи и ценности, проистекающие из обычаев и обусловленные состоянием общества. Ему характерны серьезность настойчивость, консерватизм, исполнительность. В соответствии с этим его подход к проблемам носит стереотипный, практический и конкретный характер. Профессии – машинопись, бухгалтерия, программирование, иностранные языки и пр.</p>
+            </div>
+            <div class="type-block">
+                <h3>Предприимчивый тип (П)</h3>
+                <p>Предприимчивый тип избирает цели, ценности и задачи, позволяющие ему проявить энергию, энтузиазм, импульсивность, доминантность, реализовать любовь к приключенчеству. Ему не по душе занятия, связанные с ручным трудом, а также требующие усидчивости, большой концентрации внимания и интеллектуальных усилий. Предпочитает руководящие роли в которых может удовлетворять свои потребности в доминантности и признании. Активен, предприимчив. Профессии – директор, журналист, администратор, предприниматель и др.</p>
+            </div>
+            <div class="type-block">
+                <h3>Артистичный тип (А)</h3>
+                <p>Артистичный тип отстраняется от отчетливо структурированных проблем и видов деятельности, предполагающих большую физическую силу. В общении с окружающими опираются на свои непосредственные ощущения, эмоции, интуицию и воображение. Ему присущ сложный взгляд на жизнь, гибкость, независимость суждений. Свойственна несоциальность, оригинальность. Профессии – музицирование, занятие живописью, литературное творчество, фотография, театр и пр.</p>
+            </div>
+        </div>
+    </div>
+    <!-- html2pdf.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        // Проверка заполненности всех вопросов и имени/фамилии
+        function checkFormCompletion() {
+            let allAnswered = true;
+            for (let i = 1; i <= 42; i++) {
+                if (!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    allAnswered = false;
+                    break;
+                }
+            }
+            const name = document.getElementById('userName').value.trim();
+            const surname = document.getElementById('userSurname').value.trim();
+            if (!name || !surname) allAnswered = false;
+            document.getElementById('showResultsBtn').disabled = !allAnswered;
+        }
+
+        // События для проверки заполненности
+        document.addEventListener('DOMContentLoaded', function() {
+            // Для всех radio
+            for (let i = 1; i <= 42; i++) {
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(radio => {
+                    radio.addEventListener('change', checkFormCompletion);
+                });
+            }
+            // Для имени и фамилии
+            document.getElementById('userName').addEventListener('input', checkFormCompletion);
+            document.getElementById('userSurname').addEventListener('input', checkFormCompletion);
+
+            // Клик по .profession выбирает radio
+            document.querySelectorAll('.profession').forEach(prof => {
+                prof.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'INPUT') {
+                        const radio = this.querySelector('input[type="radio"]');
+                        if (radio) {
+                            radio.checked = true;
+                            radio.dispatchEvent(new Event('change'));
+                        }
+                    }
+                });
+            });
+        });
+
+        // Показ результатов
+        function calculateResults() {
+            // Сброс выделения
+            for (let i = 1; i <= 6; i++) {
+                document.getElementById(`sum${i}`).parentElement.classList.remove('highlight');
+            }
+            // Счетчики
+            const counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
+            const choices = {1: '', 2: '', 3: '', 4: '', 5: '', 6: ''};
+            for (let i = 1; i <= 42; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if (selected) {
+                    const value = selected.value;
+                    counts[value]++;
+                    choices[value] += '+';
+                }
+            }
+            for (let i = 1; i <= 6; i++) {
+                document.getElementById(`choices${i}`).textContent = choices[i];
+                document.getElementById(`sum${i}`).textContent = counts[i];
+            }
+            // Выделение максимальных
+            const max = Math.max(...Object.values(counts));
+            for (let i = 1; i <= 6; i++) {
+                if (counts[i] === max && counts[i] > 0) {
+                    document.getElementById(`sum${i}`).parentElement.classList.add('highlight');
+                }
+            }
+            // Имя и фамилия
+            const name = document.getElementById('userName').value.trim();
+            const surname = document.getElementById('userSurname').value.trim();
+            document.getElementById('userFullName').textContent = `Имя: ${name}   Фамилия: ${surname}`;
+            // Показать результаты и типы
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('typeDescriptions').style.display = 'block';
+            document.getElementById('downloadPdfBtn').style.display = 'block';
+            // Прокрутка
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.getElementById('showResultsBtn').addEventListener('click', calculateResults);
+
+        // PDF
+        document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+            // Скрыть кнопку перед печатью
+            this.style.display = 'none';
+            // Скрыть кнопку "Показать результаты"
+            document.getElementById('showResultsBtn').style.display = 'none';
+            // Сохранить только контейнер
+            const element = document.getElementById('mainContainer');
+            html2pdf().set({
+                margin: 0.5,
+                filename: 'holland-test-result.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            }).from(element).save().then(() => {
+                // Вернуть кнопки обратно
+                document.getElementById('downloadPdfBtn').style.display = 'block';
+                document.getElementById('showResultsBtn').style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
