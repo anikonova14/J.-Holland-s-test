@@ -179,6 +179,41 @@
         #downloadPdfBtn:hover {
             background-color: #219150;
         }
+
+        /* Разрывы страниц и предотвращение "ломки" блоков на две страницы */
+        .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+        .avoid-break {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        /* Не разрывать основные блоки */
+        .question-pair,
+        table,
+        .type-block,
+        .name-block {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* Печать: если будете использовать window.print() */
+        @media print {
+            .no-print { display: none !important; }
+            .page-break {
+                page-break-before: always;
+                break-before: page;
+            }
+            .avoid-break {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
     </style>
 </head>
 <body>
@@ -661,6 +696,7 @@
             <!-- Кнопка -->
             <button type="button" id="showResultsBtn" disabled>Показать результаты</button>
         </form>
+
         <div id="results">
             <h2>Бланк ответов</h2>
             <div style="font-size:16px; margin-bottom: 10px;">
@@ -718,7 +754,12 @@
                 <strong>Интерес представляют коды профессий, набравшие наибольшее количество плюсов. Предпочтительный «профессиональный тип» личности является совокупностью двух-трех типов, набравших наибольшее количество плюсов.</strong>
             </div>
         </div>
+
         <button id="downloadPdfBtn" type="button">Скачать PDF</button>
+
+        <!-- Разрыв страницы перед типами (скрыт до показа результатов) -->
+        <div class="page-break" id="typesBreak" style="display:none;"></div>
+
         <!-- Блок с типами личности, скрыт до показа результатов -->
         <div class="type-descriptions" id="typeDescriptions" style="display:none;">
             <h2>Профессиональные типы личности</h2>
@@ -748,6 +789,7 @@
             </div>
         </div>
     </div>
+
     <!-- html2pdf.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
@@ -824,35 +866,61 @@
             const name = document.getElementById('userName').value.trim();
             const surname = document.getElementById('userSurname').value.trim();
             document.getElementById('userFullName').textContent = `Имя: ${name}   Фамилия: ${surname}`;
+
             // Показать результаты и типы
             document.getElementById('results').style.display = 'block';
+            // Поставим разрыв страницы перед типами
+            document.getElementById('typesBreak').style.display = 'block';
             document.getElementById('typeDescriptions').style.display = 'block';
             document.getElementById('downloadPdfBtn').style.display = 'block';
+
             // Прокрутка
             document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
         }
 
         document.getElementById('showResultsBtn').addEventListener('click', calculateResults);
 
-        // PDF
-        document.getElementById('downloadPdfBtn').addEventListener('click', function() {
-            // Скрыть кнопку перед печатью
-            this.style.display = 'none';
-            // Скрыть кнопку "Показать результаты"
-            document.getElementById('showResultsBtn').style.display = 'none';
-            // Сохранить только контейнер
+        // Экспорт в PDF (многостраничный A4, без кнопок в документе)
+        document.getElementById('downloadPdfBtn').addEventListener('click', async function () {
+            const downloadBtn = this;
+            const showResultsBtn = document.getElementById('showResultsBtn');
+
+            // Исключим кнопки из снимка без сдвига макета
+            [downloadBtn, showResultsBtn].forEach(el => el.setAttribute('data-html2canvas-ignore', 'true'));
+
+            // Дождёмся подгрузки шрифтов
+            try {
+                if (document.fonts && document.fonts.ready) {
+                    await document.fonts.ready;
+                }
+            } catch(e) { /* no-op */ }
+
             const element = document.getElementById('mainContainer');
-            html2pdf().set({
-                margin: 0.5,
+
+            const opt = {
+                margin: 10, // мм
                 filename: 'holland-test-result.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-            }).from(element).save().then(() => {
-                // Вернуть кнопки обратно
-                document.getElementById('downloadPdfBtn').style.display = 'block';
-                document.getElementById('showResultsBtn').style.display = 'block';
-            });
+                pagebreak: {
+                    mode: ['css', 'legacy'], // учитывать CSS-правила и старый режим
+                    avoid: ['.question-pair', '.type-block', 'table', '.name-block'] // не разрывать эти блоки
+                },
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: {
+                    scale: 2,     // при нехватке памяти уменьшите до 1–1.5
+                    useCORS: true,
+                    scrollY: 0
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            downloadBtn.disabled = true;
+            try {
+                await html2pdf().set(opt).from(element).save();
+            } finally {
+                // Вернём всё как было
+                [downloadBtn, showResultsBtn].forEach(el => el.removeAttribute('data-html2canvas-ignore'));
+                downloadBtn.disabled = false;
+            }
         });
     </script>
 </body>
